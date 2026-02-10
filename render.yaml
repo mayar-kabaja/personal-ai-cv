@@ -1,0 +1,29 @@
+# Render Blueprint: deploy backend + frontend from this repo.
+# Set env vars in the dashboard: GROQ_API_KEY, CORS_ORIGINS (backend), NEXT_PUBLIC_API_URL, NEXT_PUBLIC_SITE_URL (frontend).
+
+services:
+  - type: web
+    name: personal-ai-cv-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+
+  - type: web
+    name: personal-ai-cv-web
+    runtime: node
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
