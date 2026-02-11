@@ -19,13 +19,23 @@ function SendIcon() {
   );
 }
 
+function ScrollToBottomIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 5v14M5 12l7 7 7-7" />
+    </svg>
+  );
+}
+
 export default function Home() {
   const [messages, setMessages] = useState<Message[]>([
     { role: 'ai', content: INITIAL_AI_MESSAGE, timestamp: Date.now() },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showScrollToBottom, setShowScrollToBottom] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const scrollToBottom = () => {
@@ -34,6 +44,19 @@ export default function Home() {
 
   useEffect(() => {
     scrollToBottom();
+  }, [messages, loading]);
+
+  useEffect(() => {
+    const el = messagesContainerRef.current;
+    if (!el) return;
+    const check = () => {
+      const threshold = 100;
+      const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+      setShowScrollToBottom(!nearBottom);
+    };
+    check();
+    el.addEventListener('scroll', check, { passive: true });
+    return () => el.removeEventListener('scroll', check);
   }, [messages, loading]);
 
   const sendQuestion = async (question: string) => {
@@ -121,7 +144,7 @@ export default function Home() {
             </div>
           </header>
 
-          <div className="messages">
+          <div className="messages" ref={messagesContainerRef}>
             <div className="welcome welcome-desktop">
               <span className="welcome-icon">✦</span>
               <div className="welcome-title">
@@ -178,6 +201,18 @@ export default function Home() {
           </div>
 
           <div className="chat-bottom-bar">
+            {showScrollToBottom && (
+              <div className="scroll-to-bottom-wrap">
+                <button
+                  type="button"
+                  className="scroll-to-bottom-btn"
+                  onClick={scrollToBottom}
+                  aria-label="Scroll to bottom"
+                >
+                  <ScrollToBottomIcon />
+                </button>
+              </div>
+            )}
             <div className="chat-flags">
               {[
                 { q: "Tell me about Mayar's work experience", label: 'Work Experience' },
