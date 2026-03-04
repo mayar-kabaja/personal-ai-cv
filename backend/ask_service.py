@@ -145,7 +145,7 @@ def answer_question(question: str, data: dict, history: list[dict] | None = None
 
     context = build_context(data)
     if not context:
-        return "No CV data available to answer from."
+        return "no cv available to answer from."
 
     client = Groq(api_key=api_key)
     parts = [f"CV context:\n{context}", "\n"]
